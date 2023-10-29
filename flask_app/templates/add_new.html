@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF=8">
+	<title>Hearts Content</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+	<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/floramon.ico') }}">
+</head>
+<body>
+	<div class="container">
+		<div class="header-bar">
+			<div class="header-inner">
+				<div class="header-title">
+					<h1>Hearts Content</h1>
+				</div>
+				<div class="header-options">
+					<ul>
+						{% for nv in nav %}
+							{{ nv|safe }}
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="content-box">
+			<div class="content-inner">
+				<form action="{{ edit['location_post'] }}" method="post">
+					<div class="editor-box">
+						<h2><img class="digimon" src="{{ url_for('static', filename=edit.digimon_ico)}}" alt="{{ edit['digimon_name'] }}">{{ edit['title'] }}</h2>
+						<div>
+							<input class="butts" type="submit" value="{{ edit['action'] }}">
+							<button style="margin-left: 5px;" class="butts cancel-butts" type="button" onclick='window.location.href = "{{ edit["location_cancel"] }}"'>Cancel</button>
+						</div>
+					</div>
+					{% with messages = get_flashed_messages(category_filter=['content_posting']) %}
+					{% if messages %}
+					<div class="editor-errors">
+						<p>There's some problems:</p>
+						<ul>
+							{% for message in messages %}
+							<li>{{message}}</li>
+							{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+					{% endwith %}
+					<div class="editor-aa">
+						<label for="content_title">Title</label>
+						<input type="text" id="content_title" name="content_title" value="{{ edit['content_title'] }}"><br>
+					</div>
+					<div class="editor-aa">
+						<label for="content_desc">Description</label>
+						<input type="text" id="content_desc" name="content_desc" value="{{ edit['content_desc'] }}"><br>
+					</div>
+					<textarea id="mybox" name="content_body">{{ edit['content_body'] }}</textarea>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
