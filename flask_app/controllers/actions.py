@@ -1,5 +1,3 @@
-#I didn't really like giving the controller file a very similar name to the model files (ex: users.py & user.py), so I decided to go with this filename instead. Less confusion for my own end.
-# Do you know how I said I wouldn't do that for the exam...? Well, I lied. I'm still going to make it as organized as possible, however.
 from flask import Flask, render_template, session, redirect, request, flash
 from flask_app.models.class_users import Users
 from flask_app import app
