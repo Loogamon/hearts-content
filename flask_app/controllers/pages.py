@@ -14,7 +14,6 @@ def page_home():
     nav=NavBar.pages("Home");
     latest_content=Articles.get_all();
     liked_content=Articles.get_all_by_like();
-    print(Articles.get_count())
     # if "user_loggedon" in session:
     #    return redirect('/dashboard')
     return render_template("home.html",nav=nav,latest_content=latest_content,liked_content=liked_content);
@@ -49,15 +48,64 @@ def page_content_add():
     if "user_loggedon" not in session:
         return redirect('/user/login')
     edit={
+        "route": "/content/add",
         "title": "Add New",
         "action": "Post",
         "digimon_ico": "img/mushmon.gif",
         "digimon_name": "Mushmon",
         "location_post": "/action/content/add",
         "location_cancel": "/",
-        "content_title": "Detective Series #1: Alternative Theorem",
-        "content_desc": "Something about a detective.",
-        "content_body": "In one strange night it's been a"
+        "content_title": "",
+        "content_desc": "",
+        "content_body": ""
     }
+    if "prev" in session:
+        if session['prev']==True:
+            session['prev']=False
+            print("PREVIOUSLY ON BIG BABY")
+            edit["content_title"]=session['prev_title']
+            edit["content_desc"]=session['prev_desc']
+            edit["content_body"]=session['prev_body']
+            
+    session['page']=edit["route"]
     nav=NavBar.pages("Add New");
     return render_template("add_new.html",nav=nav,edit=edit);
+    
+@app.route('/content/edit/<int:edit_id>')
+def page_content_edit(edit_id):
+    if "user_loggedon" not in session:
+        return redirect('/user/login')
+    content=Articles.get_one(edit_id);
+    edit={
+        "route": f"/content/edit/{edit_id}",
+        "title": "Editing Content",
+        "action": "Done",
+        "digimon_ico": "img/floramon.gif",
+        "digimon_name": "Floramon",
+        "location_post": "/action/content/edit",
+        "location_cancel": "/user/dashboard",
+        "content_title": content.title,
+        "content_desc": content.description,
+        "content_body": content.body
+    }
+    if "prev" in session:
+        if session['prev']==True:
+            session['prev']=False
+            print("PREVIOUSLY ON BIG BABY")
+            edit["content_title"]=session['prev_title']
+            edit["content_desc"]=session['prev_desc']
+            edit["content_body"]=session['prev_body']
+            
+    session['page']=edit["route"]
+    session['edit_id']=edit_id
+    nav=NavBar.pages("");
+    return render_template("add_new.html",nav=nav,edit=edit);
+    
+@app.errorhandler(404)
+def page_404(e):
+     nav=NavBar.pages("")
+     error_txt={
+        "title": "404 Not Found",
+        "desc": "You know the drill, or something like that."
+     }
+     return render_template("error_message.html",nav=nav,error_txt=error_txt);

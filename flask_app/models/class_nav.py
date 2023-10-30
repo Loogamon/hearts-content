@@ -24,7 +24,7 @@ class NavBar:
             cls.add_ext("Login","/user/logout","Logout ("+name+")")
         else:
             cls.add_ext("Login","/user/login","Login")
-        print(cls.nav_items)
+        #print(cls.nav_items)
         return cls.nav_items
     @classmethod
     def add(cls,page,url):

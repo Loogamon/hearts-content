@@ -17,9 +17,9 @@ class Articles:
         self.updated_at = data['updated_at']
         self.author=Users.get_one(self.author_id)
         self.when=self.time_span()
-        self.views=self.get_views_count(self.id)
-        self.comments=self.get_comments_count(self.id)
-        self.likes=self.get_likes_count(self.id)
+        self.views=None
+        self.comments=None
+        self.likes=None
     @classmethod
     def get_count(cls):
         count=0;
@@ -28,7 +28,14 @@ class Articles:
         for item in results:
             count+=1
         return count;
-        
+
+    @classmethod
+    def get_one(cls,my_id):
+        query = "SELECT * FROM content WHERE id=%(id)s;"
+        data={ "id": my_id }
+        results = connectToMySQL(cls.DB).query_db(query,data)
+        return cls(results[0]);
+    
     @classmethod
     def get_all(cls):
         query = "SELECT * FROM content ORDER BY id DESC;"
@@ -36,16 +43,41 @@ class Articles:
         items = []
         for item in results:
             items.append(cls(item))
+        i=0
+        while i < len(items):
+            items[i].views=cls.get_views_count(items[i].id)
+            items[i].comments=cls.get_comments_count(items[i].id)
+            items[i].likes=cls.get_likes_count(items[i].id)
+            i+=1
         return items;
         
     @classmethod
     def get_all_by_like(cls):
-        query = "SELECT * FROM content LEFT JOIN likes ON content.id = likes.user_id ORDER BY content.id DESC;"
+        #i thought of maybe doing it a clever query, but I realize I could just rearrange the results within the web server, MUCH easier that way I think
+        query = "SELECT * FROM content ORDER BY id DESC;"
         results = connectToMySQL(cls.DB).query_db(query)
         items = []
-        #for item in results:
-        #    items.append(cls(item))
-        return items;
+        for item in results:
+            items.append(cls(item))
+        i=0
+        items_cpy=[]
+        while i < len(items):
+            #items[i].views=cls.get_views_count(items[i].id)
+            #items[i].comments=cls.get_comments_count(items[i].id)
+            items[i].likes=cls.get_likes_count(items[i].id)
+            if (items[i].likes>0):
+                items_cpy.append(items[i])
+            i+=1
+        i=1
+        while i < len(items_cpy):
+            x=items_cpy[i]
+            j=i-1
+            while (j>=0) and (items_cpy[j].likes<x.likes):
+                items_cpy[j+1]=items_cpy[j]
+                j-=1
+            items_cpy[j+1]=x
+            i+=1
+        return items_cpy;
 
     @classmethod
     def get_all_by_user(cls,user_id):
@@ -55,6 +87,12 @@ class Articles:
         items = []
         for item in results:
             items.append(cls(item))
+        i=0
+        while i < len(items):
+            items[i].views=cls.get_views_count(items[i].id)
+            items[i].comments=cls.get_comments_count(items[i].id)
+            items[i].likes=cls.get_likes_count(items[i].id)
+            i+=1
         return items;
     
     def time_span(self):
@@ -98,3 +136,58 @@ class Articles:
         for item in results:
             count+=1
         return count;
+    
+    @classmethod
+    def check_valid(cls,data):
+        is_valid=True
+        if not len(data['content_title'])>=3:
+            is_valid=False
+            flash("Title needs to be 3 characters or more.","content_posting")
+        if not len(data['content_title'])<=32:
+            is_valid=False
+            flash("Title must be 32 characters max.","content_posting")
+        if not len(data['content_desc'])>=3:
+            is_valid=False
+            flash("Description needs to be 3 characters or more.","content_posting")
+        if not len(data['content_desc'])<=150:
+            is_valid=False
+            flash("Title must be 150 characters max.","content_posting")
+        if not len(data['content_body'])>=3:
+            is_valid=False
+            flash("Body needs to be 3 characters or more.","content_posting")
+        return is_valid;
+    
+    @classmethod
+    def save(cls,data,user_id):
+        query="""INSERT INTO content (title,description,body,author_id)
+    		VALUES (%(title)s,
+            %(description)s,
+            %(body)s,
+            %(author_id)s);"""
+        insert={
+            "title": data['content_title'],
+            "description": data['content_desc'],
+            "body": data['content_body'],
+            "author_id": user_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query,insert)
+        return result;
+        
+    @classmethod
+    def update(cls,data,my_id,user_id):
+        query="""UPDATE content
+    	SET title=%(title)s,
+            description=%(description)s,
+            body=%(body)s,
+            updated_at=NOW()
+            WHERE id=%(id)s AND author_id=%(user_id)s;
+            """
+        insert={
+            "title": data['content_title'],
+            "description": data['content_desc'],
+            "body": data['content_body'],
+            "id":  my_id,
+            "user_id": user_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query,insert)
+        return result;

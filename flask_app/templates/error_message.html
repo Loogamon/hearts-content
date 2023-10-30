@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF=8">
+	<title>Hearts Content</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+	<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/floramon.ico') }}">
+</head>
+<body>
+	<div class="container">
+		<div class="header-bar">
+			<div class="header-inner">
+				<div class="header-title">
+					<h1>Hearts Content</h1>
+				</div>
+				<div class="header-options">
+					<ul>
+						{% for nv in nav %}
+							{{ nv|safe }}
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="content-box">
+			<div class="content-inner">
+				<h2><img class="digimon" src="{{ url_for('static', filename='img/piyomon.gif') }}" alt="Piyomon">{{ error_txt['title'] }}</h2>
+				<p>{{ error_txt['desc'] }}</p>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

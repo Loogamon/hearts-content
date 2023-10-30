@@ -3,6 +3,7 @@ from flask_app.models.class_users import Users
 from flask_app import app
 from flask_bcrypt import Bcrypt
 from flask_app.models.class_nav import NavBar
+from flask_app.models.class_content import Articles
 import datetime
 bcrypt = Bcrypt(app)
 
@@ -38,3 +39,39 @@ def action_user_login():
     session['user_loggedon']=True
     session['user_email']=request.form['login_email']
     return redirect("/");
+    
+@app.route('/action/content/add',methods=['POST'])
+def action_content_add():
+    if "user_loggedon" not in session:
+        return redirect('/user/login')
+    if "page" not in session:
+        return redirect('/')
+    print(request.form)
+    if not Articles.check_valid(request.form):
+        session['prev']=True
+        session['prev_title']=request.form['content_title']
+        session['prev_desc']=request.form['content_desc']
+        session['prev_body']=request.form['content_body']
+        return redirect(session['page'])
+    user=Users.get_userinfo(session['user_email'])
+    where=Articles.save(request.form,user.id)
+    return redirect(f"/content/view/{where}");
+    
+@app.route('/action/content/edit',methods=['POST'])
+def action_content_edit():
+    if "user_loggedon" not in session:
+        return redirect('/user/login')
+    if "page" not in session:
+        return redirect('/')
+    if "edit_id" not in session:
+        return redirect('/')
+    print(request.form)
+    if not Articles.check_valid(request.form):
+        session['prev']=True
+        session['prev_title']=request.form['content_title']
+        session['prev_desc']=request.form['content_desc']
+        session['prev_body']=request.form['content_body']
+        return redirect(session['page'])
+    user=Users.get_userinfo(session['user_email'])
+    Articles.update(request.form,session['edit_id'],user.id)
+    return redirect(f"/content/view/{session['edit_id']}");
