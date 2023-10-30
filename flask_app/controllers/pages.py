@@ -5,15 +5,19 @@ from flask_app.models.class_users import Users
 from flask_app import app
 from flask_bcrypt import Bcrypt
 from flask_app.models.class_nav import NavBar
+from flask_app.models.class_content import Articles
 import datetime
 bcrypt = Bcrypt(app)
 
 @app.route('/')
 def page_home():
     nav=NavBar.pages("Home");
+    latest_content=Articles.get_all();
+    liked_content=Articles.get_all_by_like();
+    print(Articles.get_count())
     # if "user_loggedon" in session:
     #    return redirect('/dashboard')
-    return render_template("home.html",nav=nav);
+    return render_template("home.html",nav=nav,latest_content=latest_content,liked_content=liked_content);
     
 @app.route('/content/random')
 def page_content_random():
@@ -36,7 +40,9 @@ def page_user_dashboard():
     nav=NavBar.pages("Dashboard");
     if "user_loggedon" not in session:
         return redirect('/user/login')
-    return render_template("dashboard.html",nav=nav);
+    user=Users.get_userinfo(session['user_email'])
+    user_content=Articles.get_all_by_user(user.id);
+    return render_template("dashboard.html",nav=nav,user_content=user_content);
     
 @app.route('/content/add')
 def page_content_add():

@@ -136,12 +136,18 @@ body {
 	border: 2px solid #ffdcc0;
 	border-radius: 5px;
 	transition: background-color 0.2s;
-	user-select: none;
-    cursor: pointer;
+	/*user-select: none;
+    cursor: pointer;*/
 }
-
 .content-item:hover {
 	background-color: #ffdcc0;
+}
+
+.content-item-writer {
+	margin-top: 5px;
+	font-size: 8pt;
+	font-style: italic;
+	text-align: right;
 }
 
 h2 {
@@ -151,6 +157,22 @@ h2 {
 
 h3 {
 	font-size: 14pt;
+}
+
+.content-item a {
+
+}
+
+.content-item a:link {
+	text-decoration: inherit;
+}
+
+.content-item a:visited {
+	text-decoration: inherit;
+}
+
+.content-item a:hover {
+	text-decoration: underline;
 }
 
 p {

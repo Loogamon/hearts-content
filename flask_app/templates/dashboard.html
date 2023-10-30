@@ -33,38 +33,24 @@
 					<tr>
 						<th>Name</th>
 						<th>Date</th>
-						<th>Comments</th>
 						<th>Likes</th>
+						<th>Comments</th>
 						<th>Views</th>
 						<th>Actions</th>
 					</tr>
+					{% for item in user_content %}
 					<tr>
-						<td>Content A</td>
-						<td>10/2</td>
-						<td>10</td>
-						<td>2</td>
-						<td>53</td>
-						<td>Edit Delete</td>
+						<td><a href="/content/view/{{ item.id }}">{{ item.title }}</a></td>
+						<td>{{ item.when }}</td>
+						<td>{{ item.likes }}</td>
+						<td>{{ item.comments }}</td>
+						<td>{{ item.views}}</td>
+						<td><a href="/content/edit/{{ item.id }}">Edit</a> <a href="/action/content/delete/{{ item.id }}">Delete</a></td>
 					</tr>
-					<tr>
-						<td>Content B</td>
-						<td>9/4</td>
-						<td>3</td>
-						<td>5</td>
-						<td>22</td>
-						<td>Edit Delete</td>
-					</tr>
-					<tr>
-						<td>Super Mario Reader</td>
-						<td>3/15</td>
-						<td>24</td>
-						<td>22</td>
-						<td>900</td>
-						<td>Edit Delete</td>
-					</tr>
+					{% endfor %}
 				</table>
 				{% else %}
-					<p style="text-align: center;">No content yet. <a href="/content/add">Try posting something!</a></p>
+					<p style="text-align: center;">No content yet from you. <a href="/content/add">Try posting something!</a></p>
 				{% endif %}
 			</div>
 		</div>

@@ -1,5 +1,6 @@
 from flask import session;
 from flask_app.models.class_users import Users
+from flask_app.models.class_content import Articles
 # Not actually a model, but probably necessary.
 class NavBar:
     nav_items=[]
@@ -11,7 +12,8 @@ class NavBar:
         cls.current=current_pg
         cls.nav_items=[]
         cls.add("Home","/")
-        cls.add("Random","/content/random")
+        if Articles.get_count():
+            cls.add("Random","/content/random")
         if "user_loggedon" in session:
             cls.add("Dashboard","/user/dashboard")
             cls.add("Add New","/content/add")
@@ -31,10 +33,12 @@ class NavBar:
     def add_ext(cls,page,url,alt):
         li=""
         select=False
+        li="<li"
+        li+=" onclick=\"window.location.href = '"+url+"'\""
         if cls.current==page:
-            li="<li class=\"header-selected\">"
+            li+=" class=\"header-selected\">"
         else:
-            li="<li>"
+            li+=">"
         li+="<a href=\""+url+"\">"
         if alt!="":
             li+=alt
