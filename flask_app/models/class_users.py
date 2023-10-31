@@ -4,6 +4,8 @@ EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 from flask_app import app
 from flask import flash
 from flask_bcrypt import Bcrypt
+from datetime import datetime
+import math
 bcrypt = Bcrypt(app)
 
 class Users:
@@ -16,6 +18,7 @@ class Users:
         self.password= data['password']
         self.created_at = data['created_at']
         self.updated_at = data['updated_at']
+        self.when=self.time_span()
     @classmethod
     def get_all(cls):
         query = "SELECT * FROM users;"
@@ -29,6 +32,9 @@ class Users:
         query = "SELECT * FROM users WHERE id=%(id)s;"
         data = { 'id': my_id}
         results = connectToMySQL(cls.DB).query_db(query,data)
+        if (not len(results)):
+            print("BAD DATA")
+            return None;
         return cls(results[0]);
     @classmethod
     def get_userinfo(cls,email):
@@ -95,3 +101,22 @@ class Users:
                 flash("User doesn't exist.","login")
                 is_valid = False
         return is_valid;
+        
+    def time_span(self):
+        now = datetime.now()
+        delta = now - self.created_at
+        if delta.days > 0:
+            return now.strftime("%B %d, %Y")
+        elif (math.floor(delta.total_seconds() / 60)) >= 60:
+            return f"{math.floor(math.floor(delta.total_seconds() / 60)/60)} hour(s) ago"
+        elif delta.total_seconds() >= 60:
+            return f"{math.floor(delta.total_seconds() / 60)} minute(s) ago"
+        else:
+            return f"{math.floor(delta.total_seconds())} second(s) ago"
+
+    @classmethod
+    def get_comments_count(cls,my_id):
+        query = "SELECT * FROM comments WHERE user_id=%(id)s;"
+        data = { 'id': my_id}
+        results = connectToMySQL(cls.DB).query_db(query,data)
+        return len(results);

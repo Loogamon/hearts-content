@@ -27,8 +27,8 @@
 		</div>
 		<div class="content-box">
 			<div class="content-inner">
-				<h2><img class="digimon" src="{{ url_for('static', filename='img/piyomon.gif') }}" alt="Piyomon">{{ error_txt['title'] }}</h2>
-				<p>{{ error_txt['desc'] }}</p>
+				<h2><img class="digimon" src="{{ url_for('static', filename=error_txt.digimon_ico)}}" alt="{{ error_txt['digimon_name'] }}">{{ error_txt['title'] }}</h2>
+				<p>{{ error_txt['desc']|safe }}</p>
 			</div>
 		</div>
 	</div>

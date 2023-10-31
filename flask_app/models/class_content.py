@@ -34,7 +34,19 @@ class Articles:
         query = "SELECT * FROM content WHERE id=%(id)s;"
         data={ "id": my_id }
         results = connectToMySQL(cls.DB).query_db(query,data)
-        return cls(results[0]);
+        if (not len(results)):
+            print("BAD DATA")
+            return None;
+        items = []
+        for item in results:
+            items.append(cls(item))
+        i=0
+        while i < len(items):
+            items[i].views=cls.get_views_count(items[i].id)
+            items[i].comments=cls.get_comments_count(items[i].id)
+            items[i].likes=cls.get_likes_count(items[i].id)
+            i+=1
+        return items[0];
     
     @classmethod
     def get_all(cls):
@@ -82,6 +94,22 @@ class Articles:
     @classmethod
     def get_all_by_user(cls,user_id):
         query = "SELECT * FROM content WHERE author_id=%(id)s;"
+        data = { 'id': user_id}
+        results = connectToMySQL(cls.DB).query_db(query,data)
+        items = []
+        for item in results:
+            items.append(cls(item))
+        i=0
+        while i < len(items):
+            items[i].views=cls.get_views_count(items[i].id)
+            items[i].comments=cls.get_comments_count(items[i].id)
+            items[i].likes=cls.get_likes_count(items[i].id)
+            i+=1
+        return items;
+        
+    @classmethod
+    def get_all_by_user_desc(cls,user_id):
+        query = "SELECT * FROM content WHERE author_id=%(id)s ORDER BY id DESC;"
         data = { 'id': user_id}
         results = connectToMySQL(cls.DB).query_db(query,data)
         items = []
@@ -188,6 +216,89 @@ class Articles:
             "body": data['content_body'],
             "id":  my_id,
             "user_id": user_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query,insert)
+        return result;
+    
+    @classmethod
+    def delete_all_likes(cls,my_id):
+        query  = "DELETE FROM likes WHERE content_id = %(id)s;"
+        data = {
+            "id": my_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query, data)
+        return result;
+    
+    @classmethod
+    def delete_all_comments(cls,my_id):
+        query  = "DELETE FROM comments WHERE content_id = %(id)s;"
+        data = {
+            "id": my_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query, data)
+        return result; 
+        
+    @classmethod
+    def delete_all_views(cls,my_id):
+        query  = "DELETE FROM views WHERE content_id = %(id)s;"
+        data = {
+            "id": my_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query, data)
+        return result; 
+        
+    @classmethod
+    def delete(cls,my_id,user_id):
+        cls.delete_all_likes(my_id)
+        cls.delete_all_comments(my_id)
+        cls.delete_all_views(my_id)
+        query  = "DELETE FROM content WHERE id = %(id)s AND author_id = %(user_id)s;"
+        data = {
+            "id": my_id,
+            "user_id": user_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query, data)
+        return result;
+
+    @classmethod
+    def view_me(cls,content_id):
+        query="""INSERT INTO views (content_id)
+    		VALUES (%(id)s);"""
+        insert={
+            "id": content_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query,insert)
+        return result;
+
+    @classmethod
+    def is_liked(cls,content_id,user_id):
+        query = "SELECT * FROM likes WHERE content_id = %(content_id)s AND user_id = %(user_id)s;"
+        data={
+            "content_id": content_id,
+            "user_id": user_id
+        }
+        results = connectToMySQL(cls.DB).query_db(query,data)
+        if len(results) >= 1:
+            return True;
+        return False;
+        
+    @classmethod
+    def like_me(cls,content_id,user_id):
+        query="""INSERT INTO likes (content_id,user_id)
+    		VALUES (%(id)s,%(uid)s);"""
+        insert={
+            "id": content_id,
+            "uid": user_id
+        }
+        result = connectToMySQL(cls.DB).query_db(query,insert)
+        return result;
+        
+    @classmethod
+    def reset_me(cls,content_id,user_id):
+        query  = "DELETE FROM likes WHERE content_id = %(id)s AND user_id = %(uid)s;"
+        insert={
+            "id": content_id,
+            "uid": user_id
         }
         result = connectToMySQL(cls.DB).query_db(query,insert)
         return result;
