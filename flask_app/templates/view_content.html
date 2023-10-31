@@ -33,18 +33,40 @@
 					{{ body|safe }}
 				</div>
 				<h3>Post a Comment</h3>
-				<form action="/post-request">
+				{% if user_id>-1 %}
+					{% with messages = get_flashed_messages(category_filter=['content_posting']) %}
+					{% if messages %}
+					<div class="editor-errors">
+						<p style="margin-top: 10px;">There's some problems:</p>
+						<ul>
+							{% for message in messages %}
+							<li>{{message}}</li>
+							{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+					{% endwith %}
+				<form action="/action/comment/add" method="post">
 					<div class="article-commentbox">
-						<textarea id="article-tb" name="comment_body"></textarea>
+						<textarea id="article-tb" name="content_body">{{ edit['content_body'] }}</textarea>
 						<input id="comment-button" class="butts" type="submit" value="Post">
 					</div>
 				</form>
+				{% else %}
+				<p style="margin-bottom: 25px;">Please be logged in, in order to comment!</p>
+				{% endif %}
 				
-				<!--<div class="article-comment">
-					<h4>John Smith (4 Hrs.)</h4>
-					<p>Wow, what an amazing story.</p>
-				</div>-->
+				{% if comments|length>0 %}
+				{% for box in comments %}
+				<div class="article-comment">
+				<h4><a href="/user/profile/{{ box.author.id }}">{{ box.author.first_name }} {{ box.author.last_name }}</a> ({{ box.when }}){% if user_id==box.author.id %} - <a href="/action/comment/delete/{{ box.id }}">Delete</a>{% endif %}</h4>
+					<p>{{ box.text }}</p>
 				</div>
+				{% endfor %}
+				</div>
+				{% else %}
+				<p>No comments.</p>
+				{% endif %}
 			</div>
 		</div>
 	</div>

@@ -6,6 +6,7 @@ from flask_app import app
 from flask_bcrypt import Bcrypt
 from flask_app.models.class_nav import NavBar
 from flask_app.models.class_content import Articles
+from flask_app.models.class_comment import Comments
 import datetime
 import random
 bcrypt = Bcrypt(app)
@@ -144,8 +145,10 @@ def page_content_delete(edit_id):
 def page_content_view(view_id):
     options=[]
     content=Articles.get_one(view_id);
+    me=-1;
     if "user_loggedon" in session:
         user=Users.get_userinfo(session['user_email']);
+        me=user.id;
         if content==None:
             return redirect('/error/missing-content')
         if user.id!=content.author.id:
@@ -158,39 +161,37 @@ def page_content_view(view_id):
             options.append(f"<a href=\"/content/edit/{view_id}\">edit</a>")
             options.append(f"<a href=\"/action/content/delete/{view_id}\">delete</a>")
     else:
+        me=-1
         Articles.view_me(view_id)
     edit={}
-    """
+    
     edit={
-        "route": f"/content/edit/{edit_id}",
+        "route": f"/content/edit/{view_id}",
         "title": "Editing Content",
         "action": "Done",
         "digimon_ico": "img/floramon.gif",
         "digimon_name": "Floramon",
         "location_post": "/action/content/edit",
         "location_cancel": "/user/dashboard",
-        "content_title": content.title,
-        "content_desc": content.description,
-        "content_body": content.body
+        "content_title": "",
+        "content_desc": "",
+        "content_body": ""
     }
     if "prev" in session:
         if session['prev']==True:
             session['prev']=False
             print("PREVIOUSLY ON BIG BABY")
-            edit["content_title"]=session['prev_title']
-            edit["content_desc"]=session['prev_desc']
             edit["content_body"]=session['prev_body']
     session['page']=edit["route"]
-    """        
+        
     
     session['edit_id']=view_id
     nav=NavBar.pages("");
     #body=content.body.split("\r\n")
     body=content.body.replace('\\n', '<br>')
     #print(body)
-    
-    
-    return render_template("view_content.html",content=content,nav=nav,edit=edit,body=body,options=options);
+    comments=Comments.get_all(view_id)
+    return render_template("view_content.html",content=content,nav=nav,edit=edit,body=body,options=options,comments=comments,user_id=me);
 
 @app.route('/action/rate/like/<int:target_id>')
 def action_rate_like(target_id):
@@ -217,6 +218,18 @@ def action_rate_reset(target_id):
         return redirect('/error/block-action')
     Articles.reset_me(target_id,user.id)
     return redirect(f"/content/view/{target_id}");
+    
+@app.route('/action/comment/delete/<int:target_id>')
+def action_comment_delete(target_id):
+    if "user_loggedon" not in session:
+        return redirect('/user/login')
+    content=Articles.get_one(target_id);
+    if content==None:
+        return redirect('/error/missing-content')
+    user=Users.get_userinfo(session['user_email'])
+    
+    Comments.delete(target_id,user.id)
+    return redirect(f"/content/view/{session['edit_id']}");
 
 # ==========================================================
 # -------------------- [ERRORS] ----------------------------

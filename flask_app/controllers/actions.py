@@ -4,6 +4,7 @@ from flask_app import app
 from flask_bcrypt import Bcrypt
 from flask_app.models.class_nav import NavBar
 from flask_app.models.class_content import Articles
+from flask_app.models.class_comment import Comments
 import datetime
 bcrypt = Bcrypt(app)
 
@@ -74,4 +75,18 @@ def action_content_edit():
         return redirect(session['page'])
     user=Users.get_userinfo(session['user_email'])
     Articles.update(request.form,session['edit_id'],user.id)
+    return redirect(f"/content/view/{session['edit_id']}");
+    
+@app.route('/action/comment/add',methods=['POST'])
+def action_comment_add():
+    if "user_loggedon" not in session:
+        return redirect('/user/login')
+    
+    print(request.form)
+    if not Comments.check_valid(request.form):
+        session['prev']=True
+        session['prev_body']=request.form['content_body']
+        return redirect(f"/content/view/{session['edit_id']}");
+    user=Users.get_userinfo(session['user_email'])
+    Comments.save(request.form,session['edit_id'],user.id)
     return redirect(f"/content/view/{session['edit_id']}");
